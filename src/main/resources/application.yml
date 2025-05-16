@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: team06-api-gateway
+
+  cloud:
+    gateway:
+      routes:
+        - id: team06-service
+          uri: http://localhost:8081
+          predicates:
+            - Path=/api/team6/**
+
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    reactor.netty.http.client: DEBUG
+    reactor.netty.http.server: DEBUG
