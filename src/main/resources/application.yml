@@ -11,16 +11,13 @@ spring:
             - Path=/api/team6/**
           filters:
             - name: JwtAuthentication
+
         - id: auth-service
           uri: http://localhost:8081
           predicates:
             - Path=/api/auth/user/**
 
-logging:
-  level:
-    org.springframework.cloud.gateway: DEBUG
-    reactor.netty.http.client: DEBUG
-    reactor.netty.http.server: DEBUG
-
 jwt:
   secret: f336280f7fb039ab6abaa5e7b9c3c80c8605c50acc988236e376ca3f7cca0bd7
+  protected-paths:
+    - /api/team6/user

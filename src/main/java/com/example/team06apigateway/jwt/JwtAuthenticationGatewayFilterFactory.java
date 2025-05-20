@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
@@ -21,20 +22,21 @@ import java.util.List;
 @Component
 public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config> {
 
-    @Value("${jwt.secret}")
-    private String secretKey;
+    private final JwtConfigProperties jwtConfigProperties;
 
-    public JwtAuthenticationGatewayFilterFactory() {
+    public JwtAuthenticationGatewayFilterFactory(JwtConfigProperties jwtConfigProperties) {
         super(Config.class);
+        this.jwtConfigProperties = jwtConfigProperties;
     }
 
     @Override
     public GatewayFilter apply(Config config) {
         return (exchange, chain) -> {
             ServerHttpRequest request = exchange.getRequest();
-            String path = request.getURI().getPath();
+            String path = exchange.getRequest().getURI().getPath();
 
-            if (path.startsWith("/api/auth")) {
+            boolean requiresAuth = jwtConfigProperties.getProtectedPaths().stream().anyMatch(path::startsWith);
+            if (!requiresAuth) {
                 return chain.filter(exchange);
             }
 
@@ -70,7 +72,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
     }
 
     private Key getSigningKey() {
-        byte[] keyBytes = Decoders.BASE64URL.decode(secretKey);
+        byte[] keyBytes = Decoders.BASE64URL.decode(jwtConfigProperties.getSecret());
         return Keys.hmacShaKeyFor(keyBytes);
     }
 

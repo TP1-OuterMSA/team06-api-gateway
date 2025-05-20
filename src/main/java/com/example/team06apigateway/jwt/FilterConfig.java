@@ -5,8 +5,9 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class FilterConfig {
+
     @Bean
-    public JwtAuthenticationGatewayFilterFactory jwtAuthenticationFilter() {
-        return new JwtAuthenticationGatewayFilterFactory();
+    public JwtAuthenticationGatewayFilterFactory jwtAuthenticationFilter(JwtConfigProperties jwtConfigProperties) {
+        return new JwtAuthenticationGatewayFilterFactory(jwtConfigProperties);
     }
 }
