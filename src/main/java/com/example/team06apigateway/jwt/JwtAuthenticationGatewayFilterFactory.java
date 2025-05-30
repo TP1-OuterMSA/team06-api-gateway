@@ -5,6 +5,7 @@ import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -45,6 +46,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                 return onError(exchange, "Missing or invalid Authorization header", HttpStatus.UNAUTHORIZED);
             }
+
             String token = authHeader.substring(7);
             try {
                 Claims claims = Jwts.parserBuilder()
