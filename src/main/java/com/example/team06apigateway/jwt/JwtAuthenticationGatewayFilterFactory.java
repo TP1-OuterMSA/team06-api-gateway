@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.factory.AbstractGatewayFilterFactory;
 import org.springframework.http.HttpHeaders;
@@ -19,6 +20,7 @@ import reactor.core.publisher.Mono;
 import java.security.Key;
 
 @Component
+@Slf4j
 public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilterFactory<JwtAuthenticationGatewayFilterFactory.Config> {
 
     private final JwtConfigProperties jwtConfigProperties;
@@ -39,11 +41,13 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                     .anyMatch(pattern -> matcher.match(pattern, path));
 
             if (!requiresAuth) {
+                log.info("JWT 인증 패스: {}", path);
                 return chain.filter(exchange);
             }
 
             String authHeader = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
             if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                log.warn("Missing or InvalidAuthorization header: {}", authHeader);
                 return onError(exchange, "Missing or invalid Authorization header", HttpStatus.UNAUTHORIZED);
             }
 
@@ -63,6 +67,9 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                         .anyMatch(pattern -> matcher.match(pattern, path)) && !role.equals("ROLE_ADMIN")) {
                     return onError(exchange, "Access denied: ADMIN only", HttpStatus.FORBIDDEN);
                 }
+
+                log.info("JWT Parsing 성공");
+                log.info("username={}, role={}, userId={}", username, role, userId);
 
                 ServerHttpRequest mutatedRequest = request.mutate()
                         .header("username", username)
