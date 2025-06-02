@@ -41,6 +41,7 @@ public class JwtAuthenticationGatewayFilterFactory extends AbstractGatewayFilter
                     .anyMatch(pattern -> matcher.match(pattern, path));
 
             if (!requiresAuth) {
+                log.info("paths: {}",jwtConfigProperties.getAllProtectedPaths().toString());
                 log.info("JWT 인증 패스: {}", path);
                 return chain.filter(exchange);
             }
